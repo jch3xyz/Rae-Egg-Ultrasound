@@ -1,15 +1,7 @@
-"""
-Extension classes enhance TouchDesigner components with python. An
-extension is accessed via ext.ExtensionClassName from any operator
-within the extended component. If the extension is promoted via its
-Promote Extension parameter, all its attributes with capitalized names
-can be accessed externally, e.g. op('yourComp').PromotedFunction().
-
-Help: search "Extensions" in wiki
-"""
 
 from TDStoreTools import StorageManager
 import TDFunctions as TDF
+import time
 
 class DownloadExt:
 	"""
@@ -18,28 +10,26 @@ class DownloadExt:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
-
-		# properties
-		TDF.createProperty(self, 'MyProperty', value=0, dependable=True,
-						   readOnly=False)
-
-		# attributes:
-		self.a = 0 # attribute
-		self.B = 1 # promoted attribute
-
-		# stored items (persistent across saves and re-initialization):
-		storedItems = [
-			# Only 'name' is required...
-			{'name': 'StoredProperty', 'default': None, 'readOnly': False,
-			 						'property': True, 'dependable': True},
-		]
-		# Uncomment the line below to store StoredProperty. To clear stored
-		# 	items, use the Storage section of the Component Editor
+		self.timer = self.ownerComp.op('timer1')
+		self.moviefilein = self.ownerComp.op('moviefilein1')
+		self.folder = self.ownerComp.op('folder1')
+		self.moviefilein.bypass = True
 		
-		# self.stored = StorageManager(self, ownerComp, storedItems)
+	
+	def PathToRecording(self):
+		#self.timer.par.start.pulse()
+		self.filepath = self.folder[self.folder.numRows-1, 'path']
+		print(self.folder.numRows-1, self.filepath)
+		return self.filepath
 
-	def myFunction(self, v):
-		debug(v)
+	def Hide(self):
+		self.moviefilein.bypass = True
+		return
+	
+	def Show(self):
+		self.moviefilein.bypass = False
+		return
+	
+	def StartPlayback(self):
+		self.timer.par.start.pulse()
 
-	def PromotedFunction(self, v):
-		debug(v)
