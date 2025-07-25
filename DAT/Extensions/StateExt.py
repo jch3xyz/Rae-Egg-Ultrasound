@@ -1,13 +1,3 @@
-"""
-Extension classes enhance TouchDesigner components with python. An
-extension is accessed via ext.ExtensionClassName from any operator
-within the extended component. If the extension is promoted via its
-Promote Extension parameter, all its attributes with capitalized names
-can be accessed externally, e.g. op('yourComp').PromotedFunction().
-
-Help: search "Extensions" in wiki
-"""
-
 from TDStoreTools import StorageManager
 import TDFunctions as TDF
 
@@ -18,28 +8,56 @@ class StateExt:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
+		self.selectComp = op.select_state
+		self.recordTimer = self.ownerComp.op('timer_whileRecording')
 
-		# properties
-		TDF.createProperty(self, 'MyProperty', value=0, dependable=True,
-						   readOnly=False)
+		# States
+		self.Init = False
+		self.Attract = False
+		self.Ultrasound = False
+		self.Record = False
+		self.Download = False
+		self.handActive = op('hand_active')[0].eval()
 
-		# attributes:
-		self.a = 0 # attribute
-		self.B = 1 # promoted attribute
+	def Initialize(self):
+		print('initializing...')
+		self.Init = False
 
-		# stored items (persistent across saves and re-initialization):
-		storedItems = [
-			# Only 'name' is required...
-			{'name': 'StoredProperty', 'default': None, 'readOnly': False,
-			 						'property': True, 'dependable': True},
-		]
-		# Uncomment the line below to store StoredProperty. To clear stored
-		# 	items, use the Storage section of the Component Editor
+		op.DOWNLOAD.Hide()
+
+		self.GoToAttractOrUltrasound(self.handActive)
+		return
+	
+	def GoToAttractOrUltrasound(self, hand_active):
+		if self.Init == False and self.Record == False:
+			if hand_active == 0:
+				self.selectComp.par.selectpanel = 'ATTRACT'
+				self.Attract = True
+				self.Ultrasound = False
+			else:
+				self.selectComp.par.selectpanel = 'ULTRASOUND'
+				self.Ultrasound = True
+				self.Attract = False
+		return
+	
+	def GoToRecord(self):
+		if self.Ultrasound == True:
+			self.Ultrasound = False
+			self.Record = True
+			print('recording...')
+			self.selectComp.par.selectpanel = 'RECORD'
+			op.RECORD.Record()
+			self.recordTimer.par.start.pulse()
+		return
+	
+	def GoToDownload(self):
+		if self.Record == True:
+			op.RECORD.Reset()
+			self.Record = False
+			self.Download = True
+			print('going to download...')
+			self.selectComp.par.selectpanel = 'DOWNLOAD'
+			op.DOWNLOAD.StartPlayback()
+		return
+
 		
-		# self.stored = StorageManager(self, ownerComp, storedItems)
-
-	def myFunction(self, v):
-		debug(v)
-
-	def PromotedFunction(self, v):
-		debug(v)
