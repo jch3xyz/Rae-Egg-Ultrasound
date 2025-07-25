@@ -12,7 +12,7 @@ class StateExt:
 		self.recordTimer = self.ownerComp.op('timer_whileRecording')
 
 		# States
-		self.Init = False
+		self.Init = True
 		self.Attract = False
 		self.Ultrasound = False
 		self.Record = False
@@ -22,6 +22,10 @@ class StateExt:
 	def Initialize(self):
 		print('initializing...')
 		self.Init = False
+		self.Attract = False
+		self.Ultrasound = False
+		self.Record = False
+		self.Download = False
 
 		op.DOWNLOAD.Hide()
 
@@ -29,13 +33,17 @@ class StateExt:
 		return
 	
 	def GoToAttractOrUltrasound(self, hand_active):
-		if self.Init == False and self.Record == False:
+		if self.Init == False and self.Record == False and self.Download == False:
 			if hand_active == 0:
 				self.selectComp.par.selectpanel = 'ATTRACT'
+				op.ULTRASOUND.StartRecordingTooltip.bypass = True
+				op.ULTRASOUND.HandIndicator.bypass = False
 				self.Attract = True
 				self.Ultrasound = False
 			else:
 				self.selectComp.par.selectpanel = 'ULTRASOUND'
+				op.ULTRASOUND.StartRecordingTooltip.bypass = False
+				op.ULTRASOUND.HandIndicator.bypass = True
 				self.Ultrasound = True
 				self.Attract = False
 		return
@@ -43,6 +51,8 @@ class StateExt:
 	def GoToRecord(self):
 		if self.Ultrasound == True:
 			self.Ultrasound = False
+			op.ULTRASOUND.StartRecordingTooltip.bypass = True
+			op.ULTRASOUND.HandIndicator.bypass = True
 			self.Record = True
 			print('recording...')
 			self.selectComp.par.selectpanel = 'RECORD'
