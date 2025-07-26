@@ -25,7 +25,7 @@ Unzip the zip file and open the .toe file
 
 ###
 
-It will open in perform mode. The program may take a few seconds the motion tracking to kick in
+It will open in perform mode. The program may take a few seconds for the motion tracking to kick in
 
 ###
 
