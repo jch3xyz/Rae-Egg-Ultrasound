@@ -6,6 +6,7 @@
 # Make sure the corresponding toggle is enabled in the Execute DAT.
 
 def onStart():
+	op.MEDIA_PIPE.SetCamera()
 	op.STATE.Initialize()
 	op.WINDOW.par.performance.pulse()
 	return
